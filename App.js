@@ -12,7 +12,7 @@ const App = () => {
 
 	return ( 
 		<View style={styles.container}> 
-			<Text style={styles.heading}> Geeksforgeeks </Text> 
+			<Text style={styles.heading}> flip card </Text> 
 			<FlipCard 
 				style={[styles.card, styles.shadow]} 
 				friction={6} 
