@@ -5,14 +5,15 @@ import { createStackNavigator } from '@react-navigation/stack';
 import * as FileSystem from 'expo-file-system';
 
 const wordsData = [
-  { "word": "Apple", "definition": "A red or green fruit with a sweet taste.", "id": 1 },
-  { "word": "Car", "definition": "A vehicle with four wheels that is powered by an engine.", "id": 2 },
-  { "word": "Sun", "definition": "The star that is the central body of the solar system.", "id": 3 },
+  { "word": "Elma", "definition": "Tatlı bir tada sahip kırmızı veya yeşil meyve.", "id": 1 },
+  { "word": "Araba", "definition": "Dört tekerlekli, motorla çalışan bir taşıt aracı.", "id": 2 },
+  { "word": "Güneş", "definition": "Güneş sisteminin merkezinde bulunan yıldız.", "id": 3 },
 ];
 
 const HomeScreen = ({ navigation }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [wrongAnswers, setWrongAnswers] = useState(0);
 
   const toggleCard = () => {
     setIsFlipped(!isFlipped);
@@ -30,23 +31,29 @@ const HomeScreen = ({ navigation }) => {
       let likedWords = JSON.parse(likedWordsContent);
       const currentWord = wordsData[currentIndex].word;
 
-      // Check if the word is not already liked
+      // Kelimenin daha önce beğenilip beğenilmediğini kontrol et
       if (!likedWords.includes(currentWord)) {
         likedWords.push(currentWord);
 
-        // Update the likedWords file
+        // Beğenilen kelimeler dosyasını güncelle
         await FileSystem.writeAsStringAsync(likedWordsFilePath, JSON.stringify(likedWords));
 
-        console.log('Liked word added:', currentWord);
+        console.log('Beğenilen kelime eklendi:', currentWord);
 
-        Alert.alert('Success', `${currentWord} added to liked words.`);
+        Alert.alert('Başarılı', `${currentWord} beğenilen kelimelere eklendi.`);
       } else {
-        Alert.alert('Info', `${currentWord} is already in liked words.`);
+        Alert.alert('Bilgi', `${currentWord} zaten beğenilen kelimelerde bulunuyor.`);
       }
     } catch (error) {
-      console.error('Error liking word:', error);
-      Alert.alert('Error', 'An error occurred while liking word.');
+      console.error('Kelime beğenme hatası:', error);
+      Alert.alert('Hata', 'Kelime beğenirken bir hata oluştu.');
     }
+  };
+
+  const handleWrongAnswer = () => {
+    setWrongAnswers(wrongAnswers + 1);
+    // İhtiyaca göre burada başka bir mantık ekleyebilirsiniz.
+    Alert.alert('Yanlış Cevap', 'Tekrar deneyin!');
   };
 
   useEffect(() => {
@@ -65,17 +72,23 @@ const HomeScreen = ({ navigation }) => {
       </TouchableOpacity>
       <TouchableOpacity onPress={nextCard}>
         <View style={styles.button}>
-          <Text style={styles.buttonText}>Next Card</Text>
+          <Text style={styles.buttonText}>Sonraki Kart</Text>
         </View>
       </TouchableOpacity>
       <TouchableOpacity onPress={likeWord}>
         <View style={styles.button}>
-          <Text style={styles.buttonText}>Like Word</Text>
+          <Text style={styles.buttonText}>Kelimeyi Beğen</Text>
         </View>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+      <TouchableOpacity onPress={handleWrongAnswer}>
         <View style={styles.button}>
-          <Text style={styles.buttonText}>Go to Profile</Text>
+          <Text style={styles.buttonText}>Yanlış Cevap</Text>
+        </View>
+      </TouchableOpacity>
+      <Text style={styles.buttonText}>Yanlış Cevap Sayısı: {wrongAnswers}</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Profil')}>
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>Profili Görüntüle</Text>
         </View>
       </TouchableOpacity>
     </View>
@@ -92,7 +105,7 @@ const ProfileScreen = ({ navigation }) => {
       const parsedLikedWords = JSON.parse(likedWordsContent);
       setLikedWords(parsedLikedWords);
     } catch (error) {
-      console.error('Error loading liked words:', error);
+      console.error('Beğenilen kelimeleri yükleme hatası:', error);
     }
   };
 
@@ -102,7 +115,7 @@ const ProfileScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Liked Words</Text>
+      <Text style={styles.heading}>Beğenilen Kelimeler</Text>
       <View>
         {likedWords.map((word) => (
           <Text key={word}>{word}</Text>
@@ -121,9 +134,9 @@ const App = () => {
     try {
       await FileSystem.writeAsStringAsync(likedWordsFilePath, '[]');
       const likedWordsContent = await FileSystem.readAsStringAsync(likedWordsFilePath);
-      console.log('likedWords.json content:', likedWordsContent);
+      console.log('likedWords.json içeriği:', likedWordsContent);
     } catch (error) {
-      console.error('Error creating likedWords.json:', error);
+      console.error('Beğenilen kelimeler dosyası oluşturma hatası:', error);
     }
   };
 
@@ -131,9 +144,9 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Navigator initialRouteName="AnaSayfa">
+        <Stack.Screen name="AnaSayfa" component={HomeScreen} />
+        <Stack.Screen name="Profil" component={ProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -176,13 +189,3 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginTop: 20,
-  },
-  buttonText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: 'white',
-  },
-});
-
-export default App;
