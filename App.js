@@ -85,6 +85,11 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.buttonText}>Yanlış Cevap</Text>
         </View>
       </TouchableOpacity>
+            <TouchableOpacity onPress={handleWrongAnswer}>
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>Yanlış Cevap</Text>
+        </View>
+      </TouchableOpacity>
       <Text style={styles.buttonText}>Yanlış Cevap Sayısı: {wrongAnswers}</Text>
       <TouchableOpacity onPress={() => navigation.navigate('Profil')}>
         <View style={styles.button}>
